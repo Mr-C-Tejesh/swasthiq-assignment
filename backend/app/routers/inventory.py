@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi import Query
 from datetime import date
@@ -11,6 +11,40 @@ router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"]
 )
+
+
+# ⚠️ All GET routes with fixed paths MUST come before /{medicine_id}
+# Otherwise FastAPI treats "overview" and "expired" as IDs
+
+@router.get("/overview")
+def get_inventory_overview(db: Session = Depends(get_db)):
+    total = db.query(models.Medicine).count()
+
+    active = db.query(models.Medicine).filter(
+        models.Medicine.status == "Active"
+    ).count()
+
+    low = db.query(models.Medicine).filter(
+        models.Medicine.status == "Low Stock"
+    ).count()
+
+    all_medicines = db.query(models.Medicine).all()
+    total_value = sum(m.price * m.quantity for m in all_medicines)
+
+    return {
+        "total_items": total,
+        "active_stock": active,
+        "low_stock": low,
+        "total_value": round(total_value, 2)
+    }
+
+
+@router.get("/expired")
+def get_expired_medicines(db: Session = Depends(get_db)):
+    expired_medicines = db.query(models.Medicine).filter(
+        models.Medicine.expiry_date < date.today()
+    ).all()
+    return expired_medicines
 
 
 @router.get("/")
@@ -38,14 +72,34 @@ def update_medicine(
     medicine: schemas.MedicineUpdate,
     db: Session = Depends(get_db)
 ):
+    db_medicine = db.query(models.Medicine).filter(
+        models.Medicine.id == medicine_id
+    ).first()
+
+    if not db_medicine:
+        raise HTTPException(status_code=404, detail="Medicine not found")
+
     return crud.update_medicine(db, medicine_id, medicine)
 
 
-@router.get("/expired")
-def get_expired_medicines(db: Session = Depends(get_db)):
+@router.patch("/{medicine_id}/status")
+def update_medicine_status(
+    medicine_id: int,
+    payload: dict,
+    db: Session = Depends(get_db)
+):
+    db_medicine = db.query(models.Medicine).filter(
+        models.Medicine.id == medicine_id
+    ).first()
 
-    expired_medicines = db.query(models.Medicine).filter(
-        models.Medicine.expiry_date < date.today()
-    ).all()
+    if not db_medicine:
+        raise HTTPException(status_code=404, detail="Medicine not found")
 
-    return expired_medicines
+    valid = ["Active", "Low Stock", "Expired", "Out of Stock"]
+    if payload.get("status") not in valid:
+        raise HTTPException(status_code=400, detail=f"Status must be one of {valid}")
+
+    db_medicine.status = payload["status"]
+    db.commit()
+    db.refresh(db_medicine)
+    return db_medicine

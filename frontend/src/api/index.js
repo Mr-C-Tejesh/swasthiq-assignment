@@ -14,15 +14,16 @@ async function request(path, options = {}) {
 
 export const api = {
   dashboard: {
-    summary:   () => request("/dashboard/summary"),
-    lowStock:  () => request("/dashboard/low-stock"),
+    summary:     () => request("/dashboard/summary"),
+    lowStock:    () => request("/dashboard/low-stock"),
     recentSales: () => request("/dashboard/recent-sales"),
   },
   inventory: {
+    overview: () => request("/inventory/overview"),
     list: ({ search = "", status = "", page = 1, limit = 10 } = {}) =>
       request(`/inventory?search=${search}&status=${status}&page=${page}&limit=${limit}`),
     create: (data) =>
-      request("/inventory", { method: "POST", body: JSON.stringify(data) }),
+      request("/inventory/", { method: "POST", body: JSON.stringify(data) }),
     update: (id, data) =>
       request(`/inventory/${id}`, { method: "PUT", body: JSON.stringify(data) }),
     updateStatus: (id, status) =>
