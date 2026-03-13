@@ -1,34 +1,86 @@
 # Pharmacy CRM – SwasthiQ Assignment
 
 ## Overview
-A Pharmacy CRM system built with FastAPI and React that allows managing medicines,
-monitoring stock, and viewing dashboard analytics.
+This project is a Pharmacy CRM system built using FastAPI for the backend and React for the frontend.
+
+The system allows pharmacists to manage medicines, track inventory status, and view dashboard statistics.
+
+---
 
 ## Tech Stack
-Backend: FastAPI, SQLite
-Frontend: React (functional components + hooks)
 
-## API Design
+Backend
+- FastAPI
+- SQLite
+- SQLAlchemy
+
+Frontend
+- React (Functional Components + Hooks)
+
+---
+
+## Project Structure
+
+swasthiq-assignment
+ ├ backend
+ ├ frontend
+ └ README.md
+
+---
+
+## API Structure
 
 ### Inventory APIs
-GET /inventory
-POST /inventory
-GET /inventory/expired
+
+GET /inventory  
+Returns list of medicines with search, filter, and pagination.
+
+POST /inventory  
+Adds a new medicine to inventory.
+
+GET /inventory/expired  
+Returns medicines where expiry_date < today.
+
+---
 
 ### Dashboard APIs
-GET /dashboard/summary
-GET /dashboard/low-stock
-GET /dashboard/purchase-orders
+
+GET /dashboard/summary  
+Returns total items, low stock items, and out of stock items.
+
+GET /dashboard/low-stock  
+Returns medicines with low quantity.
+
+GET /dashboard/purchase-orders  
+Returns purchase order statistics.
+
+---
 
 ## Data Consistency
 
-When medicines are created or updated, the backend automatically recalculates
-the medicine status based on quantity and expiry date.
+The backend ensures correct inventory status automatically.
 
-Status rules:
-- quantity = 0 → Out of Stock
-- quantity < threshold → Low Stock
-- expiry_date < today → Expired
-- otherwise → Active
+Rules used:
 
-This ensures the frontend always receives consistent inventory state.
+quantity = 0 → Out of Stock  
+quantity < threshold → Low Stock  
+expiry_date < today → Expired  
+otherwise → Active
+
+Whenever a medicine is created or updated, the backend recalculates the correct status. This ensures the frontend always receives consistent data.
+
+---
+
+## Running the Project
+
+Backend
+
+cd backend  
+pip install -r requirements.txt  
+uvicorn app.main:app --reload  
+
+Frontend
+
+cd frontend  
+npm install  
+npm start
