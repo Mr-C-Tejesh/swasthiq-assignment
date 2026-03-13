@@ -38,15 +38,6 @@ export default function Dashboard() {
           <h1 className="page-title">Pharmacy CRM</h1>
           <p className="page-sub">Manage inventory, sales, and purchase orders</p>
         </div>
-        <div className="header-actions">
-          <button className="btn btn-outline">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Export
-          </button>
-          <button className="btn btn-primary">
-            <span>+</span> Add Medicine
-          </button>
-        </div>
       </div>
 
       {/* Stat cards */}
@@ -90,8 +81,6 @@ export default function Dashboard() {
         <div className="card-header">
           <span className="card-title">Recent Sales</span>
           <div className="card-header-right">
-            <button className="btn btn-primary btn-sm">+ New Sale</button>
-            <button className="btn btn-outline btn-sm">+ New Purchase</button>
           </div>
         </div>
 
