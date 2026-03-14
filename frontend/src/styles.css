@@ -306,3 +306,11 @@ body {
   background: var(--surface-2); padding: 10px 14px;
   border-radius: var(--radius-xs); border: 1px solid var(--border-2);
 }
+
+@media (max-width: 768px) {
+  .sidebar { width: 50px; }
+  .nav-label { display: none; }
+  .page { padding: 16px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .overview-grid { grid-template-columns: repeat(2, 1fr); }
+}
