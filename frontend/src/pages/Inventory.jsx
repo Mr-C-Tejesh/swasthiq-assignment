@@ -96,7 +96,7 @@ function MedicineModal({ medicine, onClose, onSaved }) {
       </Field>
       <Field label="Generic Name">
         <input className="input" value={form.generic_name}
-          onChange={e => set("generic_name", e.target.value)} placeholder="e.g. Paracetamol" />
+          onChange={e => set("generic_name", e.target.value)} placeholder="e.g. Acetaminophen" />
       </Field>
       <Field label="Batch No">
         <input className="input" value={form.batch_no}
