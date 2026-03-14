@@ -3,6 +3,10 @@ from sqlalchemy import func
 from fastapi import HTTPException
 from datetime import date, datetime
 from . import models, schemas
+from datetime import datetime, timezone, timedelta
+IST = timezone(timedelta(hours=5, minutes=30))
+def ist_now():
+    return datetime.now(IST).replace(tzinfo=None)
 
 
 # ── Status Logic ─────────────────────────────────────────────────────────────
@@ -50,7 +54,7 @@ def get_medicine_by_id(db: Session, medicine_id: int) -> models.Medicine:
             detail={
                 "error": "Medicine not found",
                 "medicine_id": medicine_id,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": ist_now().isoformat()
             }
         )
     return med
@@ -113,7 +117,7 @@ def create_medicine(db: Session, medicine: schemas.MedicineCreate) -> models.Med
             detail={
                 "error": "Batch number already exists",
                 "batch_no": medicine.batch_no,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": ist_now().isoformat()
             }
         )
 
@@ -152,7 +156,7 @@ def update_medicine(
                 detail={
                     "error": "Batch number already in use by another medicine",
                     "batch_no": update_data["batch_no"],
-                    "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": ist_now().isoformat()
                 }
             )
 
@@ -161,7 +165,7 @@ def update_medicine(
 
     # recalculate status after update
     db_medicine.status = calculate_status(db_medicine.quantity, db_medicine.expiry_date)
-    db_medicine.updated_at = datetime.utcnow()
+    db_medicine.updated_at = ist_now()
 
     db.commit()
     db.refresh(db_medicine)
@@ -175,7 +179,7 @@ def update_medicine_status(
 ) -> models.Medicine:
     db_medicine = get_medicine_by_id(db, medicine_id)
     db_medicine.status = new_status
-    db_medicine.updated_at = datetime.utcnow()
+    db_medicine.updated_at = ist_now()
     db.commit()
     db.refresh(db_medicine)
     return db_medicine

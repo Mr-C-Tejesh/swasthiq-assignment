@@ -7,10 +7,11 @@ Expiry dates are spread across past/present/future to demonstrate
 all four status types automatically.
 """
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timezone, timedelta, date
 from .database import SessionLocal
 from . import models
 
+IST = timezone(timedelta(hours=5, minutes=30))
 
 def seed():
     db = SessionLocal()
@@ -144,7 +145,7 @@ def seed():
             "payment_mode": "UPI",
             "total_amount": 375.0,
             "status":       "Completed",
-            "created_at":   datetime.utcnow() - timedelta(hours=2),
+            "created_at":   datetime.now(IST).replace(tzinfo=None) - timedelta(hours=2),
             "items": [
                 {"medicine": "Dolo 650",     "qty": 2},
                 {"medicine": "Pantop 40",    "qty": 1},
@@ -156,7 +157,7 @@ def seed():
             "payment_mode": "Cash",
             "total_amount": 240.0,
             "status":       "Completed",
-            "created_at":   datetime.utcnow() - timedelta(hours=5),
+            "created_at":   datetime.now(IST).replace(tzinfo=None) - timedelta(hours=5),
             "items": [
                 {"medicine": "Metformin 500mg", "qty": 1},
                 {"medicine": "Telma 40",        "qty": 1},
@@ -168,7 +169,7 @@ def seed():
             "payment_mode": "Card",
             "total_amount": 195.0,
             "status":       "Completed",
-            "created_at":   datetime.utcnow() - timedelta(hours=8),
+            "created_at":   datetime.now(IST).replace(tzinfo=None) - timedelta(hours=8),
             "items": [
                 {"medicine": "Augmentin 625", "qty": 1},
             ]
@@ -179,7 +180,7 @@ def seed():
             "payment_mode": "UPI",
             "total_amount": 580.0,
             "status":       "Completed",
-            "created_at":   datetime.utcnow() - timedelta(days=1),
+            "created_at":   datetime.now(IST).replace(tzinfo=None) - timedelta(days=1),
             "items": [
                 {"medicine": "Augmentin 625", "qty": 2},
                 {"medicine": "Dolo 650",      "qty": 3},
@@ -191,7 +192,7 @@ def seed():
             "payment_mode": "Cash",
             "total_amount": 110.0,
             "status":       "Completed",
-            "created_at":   datetime.utcnow() - timedelta(days=1, hours=3),
+            "created_at":   datetime.now(IST).replace(tzinfo=None) - timedelta(days=1, hours=3),
             "items": [
                 {"medicine": "Ecosprin 75mg", "qty": 2},
                 {"medicine": "Pantop 40",     "qty": 1},
