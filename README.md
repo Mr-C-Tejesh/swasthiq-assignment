@@ -3,9 +3,9 @@
 A full-stack Pharmacy CRM built with **FastAPI + SQLite** (backend) and **React** (frontend).
 
 ## Live Demo
-- **Frontend:** https://your-vercel-url.vercel.app
-- **Backend API:** https://your-render-url.onrender.com
-- **API Docs (Swagger):** https://your-render-url.onrender.com/docs
+- **Frontend:** https://pharmacy-luigjw9di-mr-c-tejeshs-projects.vercel.app
+- **Backend API:** https://pharmacy-crm-api.onrender.com
+- **API Docs (Swagger):** https://pharmacy-crm-api.onrender.com/docs
 
 ---
 
