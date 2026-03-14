@@ -36,7 +36,7 @@ export const api = {
       return request(`/inventory/?${params.toString()}`);
     },
     get:    (id)       => request(`/inventory/${id}`),
-    create: (data)     => request("/inventory/", { method: "POST", body: JSON.stringify(data) }),
+    create: (data)     => request("/inventory", { method: "POST", body: JSON.stringify(data) }),
     update: (id, data) => request(`/inventory/${id}`, { method: "PUT",   body: JSON.stringify(data) }),
     updateStatus: (id, status) =>
       request(`/inventory/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
