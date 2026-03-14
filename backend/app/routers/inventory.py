@@ -1,70 +1,62 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
-from fastapi import Query
 from datetime import date
+from typing import Optional
 
 from ..database import get_db
-from .. import crud, schemas
-from .. import models
+from .. import crud, schemas, models
 
 router = APIRouter(
     prefix="/inventory",
     tags=["Inventory"]
 )
 
-
-# ⚠️ All GET routes with fixed paths MUST come before /{medicine_id}
-# Otherwise FastAPI treats "overview" and "expired" as IDs
+def build_response(med: models.Medicine) -> dict:
+    return {
+        "id":             med.id,
+        "name":           med.name,
+        "generic_name":   med.generic_name,
+        "batch_no":       med.batch_no,
+        "expiry_date":    str(med.expiry_date),
+        "quantity":       med.quantity,
+        "price":          med.price,
+        "supplier":       med.supplier,
+        "status":         med.status,
+        "created_at":     str(med.created_at),
+        "updated_at":     str(med.updated_at),
+        "days_to_expiry": (med.expiry_date - date.today()).days
+    }
 
 @router.get("/overview")
 def get_inventory_overview(db: Session = Depends(get_db)):
-    total = db.query(models.Medicine).count()
-
-    active = db.query(models.Medicine).filter(
-        models.Medicine.status == "Active"
-    ).count()
-
-    low = db.query(models.Medicine).filter(
-        models.Medicine.status == "Low Stock"
-    ).count()
-
-    all_medicines = db.query(models.Medicine).all()
-    total_value = sum(m.price * m.quantity for m in all_medicines)
-
-    return {
-        "total_items": total,
-        "active_stock": active,
-        "low_stock": low,
-        "total_value": round(total_value, 2)
-    }
-
+    return crud.get_inventory_overview(db)
 
 @router.get("/expired")
 def get_expired_medicines(db: Session = Depends(get_db)):
-    expired_medicines = db.query(models.Medicine).filter(
-        models.Medicine.expiry_date < date.today()
+    medicines = db.query(models.Medicine).filter(
+        models.Medicine.expiry_date <= date.today()
     ).all()
-    return expired_medicines
-
+    return [build_response(m) for m in medicines]
 
 @router.get("/")
 def list_medicines(
-    search: str = Query(None),
-    status: str = Query(None),
-    page: int = Query(1),
-    limit: int = Query(10),
+    search:  Optional[str] = Query(None),
+    status:  Optional[str] = Query(None),
+    page:    int           = Query(1, ge=1),
+    limit:   int           = Query(10, ge=1, le=100),
     db: Session = Depends(get_db)
 ):
-    return crud.get_medicines(db, search, status, page, limit)
+    result = crud.get_medicines(db, search, status, page, limit)
+    result["data"] = [build_response(m) for m in result["data"]]
+    return result
 
-
-@router.post("/")
+@router.post("/", status_code=201)
 def add_medicine(
     medicine: schemas.MedicineCreate,
     db: Session = Depends(get_db)
 ):
-    return crud.create_medicine(db, medicine)
-
+    med = crud.create_medicine(db, medicine)
+    return build_response(med)
 
 @router.put("/{medicine_id}")
 def update_medicine(
@@ -72,34 +64,14 @@ def update_medicine(
     medicine: schemas.MedicineUpdate,
     db: Session = Depends(get_db)
 ):
-    db_medicine = db.query(models.Medicine).filter(
-        models.Medicine.id == medicine_id
-    ).first()
-
-    if not db_medicine:
-        raise HTTPException(status_code=404, detail="Medicine not found")
-
-    return crud.update_medicine(db, medicine_id, medicine)
-
+    med = crud.update_medicine(db, medicine_id, medicine)
+    return build_response(med)
 
 @router.patch("/{medicine_id}/status")
 def update_medicine_status(
     medicine_id: int,
-    payload: dict,
+    payload: schemas.StatusUpdate,
     db: Session = Depends(get_db)
 ):
-    db_medicine = db.query(models.Medicine).filter(
-        models.Medicine.id == medicine_id
-    ).first()
-
-    if not db_medicine:
-        raise HTTPException(status_code=404, detail="Medicine not found")
-
-    valid = ["Active", "Low Stock", "Expired", "Out of Stock"]
-    if payload.get("status") not in valid:
-        raise HTTPException(status_code=400, detail=f"Status must be one of {valid}")
-
-    db_medicine.status = payload["status"]
-    db.commit()
-    db.refresh(db_medicine)
-    return db_medicine
+    med = crud.update_medicine_status(db, medicine_id, payload.status)
+    return build_response(med)

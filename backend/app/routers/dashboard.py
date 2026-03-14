@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from datetime import date
 
 from ..database import get_db
-from .. import models
+from .. import crud, models
 
 router = APIRouter(
     prefix="/dashboard",
@@ -12,87 +13,55 @@ router = APIRouter(
 
 @router.get("/summary")
 def dashboard_summary(db: Session = Depends(get_db)):
-    total_items = db.query(models.Medicine).count()
-
-    low_stock = db.query(models.Medicine).filter(
-        models.Medicine.status == "Low Stock"
-    ).count()
-
-    out_of_stock = db.query(models.Medicine).filter(
-        models.Medicine.status == "Out of Stock"
-    ).count()
-
-    all_medicines = db.query(models.Medicine).all()
-    items_sold = sum(m.quantity for m in all_medicines)
-
-    return {
-        "total_items": total_items,
-        "low_stock": low_stock,
-        "out_of_stock": out_of_stock,
-        "today_sales": 124580,
-        "items_sold": items_sold,
-        "purchase_orders_value": 96250
-    }
+    """
+    Returns today's sales, items sold, low stock count, and medicine overview.
+    All values are computed from the database — no hardcoded numbers.
+    """
+    return crud.get_dashboard_summary(db)
 
 
 @router.get("/low-stock")
 def get_low_stock_items(db: Session = Depends(get_db)):
-    medicines = db.query(models.Medicine).filter(
-        models.Medicine.quantity < 20
-    ).all()
-    return medicines
+    """
+    Returns medicines with quantity below 20 or marked as expired.
+    Status is recalculated on every call.
+    """
+    medicines = crud.get_low_stock_items(db)
+    return [
+        {
+            **m.__dict__,
+            "days_to_expiry": (m.expiry_date - date.today()).days
+        }
+        for m in medicines
+    ]
 
 
 @router.get("/recent-sales")
-def get_recent_sales():
-    # No Sales model yet — returns sample data so UI is not empty
+def get_recent_sales(db: Session = Depends(get_db)):
+    """
+    Returns last 10 sales ordered by most recent.
+    """
+    sales = crud.get_recent_sales(db)
     return {
         "sales": [
             {
-                "id": 1,
-                "invoice_no": "INV-2024-1234",
-                "patient_name": "Rajesh Kumar",
-                "item_count": 3,
-                "payment_mode": "Card",
-                "total_amount": 340,
-                "status": "Completed",
-                "sale_date": "2024-11-01"
-            },
-            {
-                "id": 2,
-                "invoice_no": "INV-2024-1235",
-                "patient_name": "Sarah Smith",
-                "item_count": 2,
-                "payment_mode": "Cash",
-                "total_amount": 145,
-                "status": "Completed",
-                "sale_date": "2024-11-01"
-            },
-            {
-                "id": 3,
-                "invoice_no": "INV-2024-1236",
-                "patient_name": "Michael Johnson",
-                "item_count": 5,
-                "payment_mode": "UPI",
-                "total_amount": 525,
-                "status": "Completed",
-                "sale_date": "2024-11-01"
+                "id":           s.id,
+                "invoice_no":   s.invoice_no,
+                "patient_name": s.patient_name,
+                "payment_mode": s.payment_mode,
+                "total_amount": s.total_amount,
+                "status":       s.status,
+                "item_count":   len(s.items),
+                "sale_date":    s.created_at.isoformat(),
             }
+            for s in sales
         ]
     }
 
 
 @router.get("/purchase-orders")
 def purchase_order_summary(db: Session = Depends(get_db)):
-    pending_orders = db.query(models.Medicine).filter(
-        models.Medicine.quantity < 20
-    ).count()
-
-    completed_orders = db.query(models.Medicine).filter(
-        models.Medicine.quantity >= 20
-    ).count()
-
-    return {
-        "pending_orders": pending_orders,
-        "completed_orders": completed_orders
-    }
+    """
+    Returns purchase order summary — items needing reorder and estimated cost.
+    """
+    return crud.get_purchase_order_summary(db)
