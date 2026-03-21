@@ -1,4 +1,4 @@
-# Pharmacy CRM — SwasthiQ Internship Assignment
+# Pharmacy CRM
 
 A full-stack Pharmacy CRM built with **FastAPI + SQLite** (backend) and **React** (frontend).
 
