@@ -28,7 +28,7 @@ class Medicine(Base):
     expiry_date  = Column(Date, nullable=False)
     quantity     = Column(Integer, nullable=False, default=0)
     price        = Column(Float, nullable=False)
-    supplier     = Column(String, nullable=False) # Keep for backward compatibility/UI simplicity if needed, or deprecate. We will use supplier_id.
+    supplier     = Column(String, nullable=False) 
     supplier_id  = Column(Integer, ForeignKey("suppliers.id"), nullable=True)
 
     status = Column(String, nullable=False, default="Active")

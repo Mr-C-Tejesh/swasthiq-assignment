@@ -4,13 +4,11 @@ import { StatusBadge, Spinner, Modal, Field } from "../components";
 
 const STATUSES = ["Active", "Low Stock", "Out of Stock", "Expired"];
 
-// status field intentionally removed — backend always calculates it
 const EMPTY = {
   name: "", generic_name: "", batch_no: "",
   expiry_date: "", quantity: "", price: "", supplier: "",
 };
 
-// days_to_expiry warning badge shown in table
 function ExpiryWarning({ days }) {
   if (days === undefined || days === null) return null;
   if (days <= 0)   return <span className="expiry-tag expiry-expired">Expired</span>;
@@ -19,7 +17,6 @@ function ExpiryWarning({ days }) {
   return null;
 }
 
-// filter dropdown panel
 function FilterPanel({ status, onStatus, onClose }) {
   return (
     <div className="filter-panel">

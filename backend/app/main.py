@@ -31,7 +31,6 @@ app.include_router(suppliers_router)
 
 @app.on_event("startup")
 def on_startup():
-    # seed sample data on first run — skips if data already exists
     seed()
 
 

@@ -2,6 +2,7 @@
 
 A robust, full-stack Pharmacy Management System designed for professional portfolio and DBMS college evaluation. This project features a modern React dashboard connected to a high-performance FastAPI backend, implementing a complex relational database structure for inventory, sales, and supplier management.
 
+
 ## 🚀 Project Overview
 - **Pharmacy Inventory Management:** Comprehensive tracking of medical stock with automatic status updates.
 - **Billing & Point-of-Sale (POS):** Real-time invoice generation with automatic stock deduction.
